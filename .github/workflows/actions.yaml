@@ -21,5 +21,6 @@ jobs:
       - run: terraform show -json plan.tfplan | terraform-j2md > plan.md
       - run: gh pr comment ${{ github.event.number }} -F plan.md --edit-last
         id: edit-last
+        continue-on-error: true
       - run: gh pr comment ${{ github.event.number }} -F plan.md
         if: failure() && steps.edit-last.outcome == 'failure'

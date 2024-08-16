@@ -18,7 +18,10 @@ jobs:
           version: v0.0.9
       - run: terraform init
       - run: terraform plan -out=plan.tfplan
-      - run: echo "md=$(terraform show -json plan.tfplan | terraform-j2md)" >> "$GITHUB_OUTPUT"
+      - run: |
+          echo "md<<EOF" >> "GITHUB_OUTPUT"
+          terraform show -json plan.tfplan | terraform-j2md >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
         id: plan
       - run: echo ${{ steps.plan.outputs.md }} | gh pr comment ${{ github.event.number }} -F - --edit-last
         id: edit-last

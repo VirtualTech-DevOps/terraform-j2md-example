@@ -8,7 +8,7 @@ jobs:
     outputs:
       md: ${{ steps.plan-md.outputs.out }}
     steps:
-      - uses: hashicorp/setup-terraform@v3e
+      - uses: hashicorp/setup-terraform@v3
         with:
           terraform_vrsion: 1.9.4
       - uses: reproio/terraform-j2md@master

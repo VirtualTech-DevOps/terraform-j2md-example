@@ -1,0 +1,24 @@
+on:
+  pull_request:
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.4
+      - uses: reproio/terraform-j2md@master
+        with:
+          version: v0.0.9
+      - run: terraform init
+      - run: terraform plan -out=plan.tfplan
+      - run: terraform show -json plan.tfplan | terraform-j2md > plan.md
+      - run: |
+          gh pr comment ${{ github.event.number }} -F plan.md --edit-last \
+          || gh pr comment ${{ github.event.number }} -F plan.md

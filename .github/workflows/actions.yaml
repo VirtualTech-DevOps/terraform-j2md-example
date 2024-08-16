@@ -4,8 +4,10 @@ on:
 jobs:
   plan:
     runs-on: ubuntu-latest
-    outputs:
-      md: ${{ steps.plan-md.outputs.out }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+    permissions:
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -16,18 +18,9 @@ jobs:
           version: v0.0.9
       - run: terraform init
       - run: terraform plan -out=plan.tfplan
-      - run: echo "out=$(terraform show -json plan.tfplan | terraform-j2md)" >> "$GITHUB_OUTPUT"
-        id: plan-md
-  comment:
-    runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ github.token }}
-    permissions:
-      pull-requests: write
-    needs: plan
-    steps:
-      - uses: actions/checkout@v4
-      - run: echo ${{ needs.plan.outputs.md }} | gh pr comment ${{ github.event.number }} -F - --edit-last
+      - run: echo "md=$(terraform show -json plan.tfplan | terraform-j2md)" >> "$GITHUB_OUTPUT"
+        id: plan
+      - run: echo ${{ steps.plan.outputs.md }} | gh pr comment ${{ github.event.number }} -F - --edit-last
         id: edit-last
-      - run: echo ${{ needs.plan.outputs.md }} | gh pr comment ${{ github.event.number }} -F -
+      - run: echo ${{ steps.plan.outputs.md }} | gh pr comment ${{ github.event.number }} -F -
         if: failure() && steps.edit-last.outcome == 'failure'

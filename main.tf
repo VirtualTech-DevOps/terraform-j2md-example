@@ -1,3 +1,3 @@
-resource "random_id" "server" {
+resource "random_id" "this" {
   byte_length = 8
 }

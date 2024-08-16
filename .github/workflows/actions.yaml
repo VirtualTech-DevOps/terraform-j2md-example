@@ -28,6 +28,8 @@ jobs:
       pull-requests: write
     needs: plan
     steps:
-      - run: |
-          echo ${{ needs.plan.outputs.md }} | gh pr comment ${{ github.event.number }} -F - --edit-last \
-          || echo ${{ needs.plan.outputs.md }} | gh pr comment ${{ github.event.number }} -F -
+      - uses: actions/checkout@v4
+      - run: echo ${{ needs.plan.outputs.md }} | gh pr comment ${{ github.event.number }} -F - --edit-last
+        id: edit-last
+      - run: echo ${{ needs.plan.outputs.md }} | gh pr comment ${{ github.event.number }} -F -
+        if: failure() && steps.edit-last.outcome == 'failure'
